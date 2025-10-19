@@ -1,14 +1,14 @@
-import { createClient } from "@supabase/supabase-js";
+// src/supabaseClient.ts
+import { createClient } from '@supabase/supabase-js';
 
-// Load environment variables (make sure these exist in .env)
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const VITE_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const VITE_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Initialize Supabase client with session persistence
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true, // ✅ This ensures session data is stored
-    autoRefreshToken: true, // ✅ Automatically refreshes token
-    detectSessionInUrl: true, // ✅ Detects session from URL after login
-  },
-});
+if (!VITE_SUPABASE_URL || !VITE_SUPABASE_ANON_KEY) {
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
+}
+
+console.log('Supabase URL:', VITE_SUPABASE_URL);
+console.log('Supabase Anon Key:', VITE_SUPABASE_ANON_KEY);
+export const supabase = createClient(VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY);
+

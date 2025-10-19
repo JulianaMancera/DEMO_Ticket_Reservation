@@ -1,39 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import Auth from './Auth';
-import EventList from './EventList';
+import type { Session } from '@supabase/supabase-js'; 
+import Auth from './components/Auth';
+import EventList from './components/Eventlist';
 
 function App() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null); // Explicitly typed
+  const [loading, setLoading] = useState<boolean>(true); // Explicitly typed
 
   useEffect(() => {
-    const getInitialSession = async () => {
-      try {
-        setLoading(true);
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-      } catch (e) {
-        console.error("Error fetching session:", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getInitialSession();
+  const getInitialSession = async () => {
+    try {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    } catch (e) {
+      console.error("Error fetching session:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+  getInitialSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
-        setSession(currentSession);
-        setLoading(false);
-      }
-    );
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (_event, currentSession) => {
+      setSession(currentSession);
+      setLoading(false);
+    }
+  );
 
-    return () => {
-      if (listener?.subscription?.unsubscribe) {
-        listener.subscription.unsubscribe();
-      }
-    };
-  }, []);
+  return () => {
+    if (listener?.subscription?.unsubscribe) {
+      listener.subscription.unsubscribe();
+    }
+  };
+}, []);
 
   if (loading) {
     return (

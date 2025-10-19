@@ -1,8 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 import Account from './Account';
+import type { Session } from '@supabase/supabase-js';
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  tickets: number;
+  price: number;
+}
 
-const EventList = ({ session }) => {
-  const [events, setEvents] = useState([]);
+const EventList = ({ session }: { session: Session | null }) => {
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +37,7 @@ const EventList = ({ session }) => {
     <div className="w-full max-w-4xl mx-auto py-8">
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-4xl font-extrabold text-indigo-800">Available Events</h1>
-        <Account session={session} />
+        {session && <Account session={session} />}
       </header>
 
       {loading ? (

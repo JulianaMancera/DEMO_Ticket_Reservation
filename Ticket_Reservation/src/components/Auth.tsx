@@ -1,42 +1,42 @@
 import { useState } from "react";
 import { supabase } from "../../supabaseClient";
+
+
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
   // Handles Email Magic Link Login
-  const handleEmailLogin = async (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
+ const handleEmailLogin = async (e: { preventDefault: () => void; }) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage('');
+  console.log('Attempting email login with:', email);
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin }
+  });
+  console.log('Auth response:', { data, error });
+  if (error) {
+    setMessage(`Error: ${error.message}`);
+  } else {
+    setMessage('Success! Check your email for the login link.');
+  }
+  setLoading(false);
+};
 
-    const { error } = await supabase.auth.signInWithOtp({ 
-      email, 
-      options: { emailRedirectTo: window.location.origin }
-    });
+const handleGoogleLogin = async () => {
+  setMessage('');
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
-    } else {
-      setMessage('Success! Check your email for the login link.');
-      setEmail('');
-    }
-    setLoading(false);
-  };
-  
-  // Handles Google OAuth Login
-  const handleGoogleLogin = async () => {
-    setMessage('');
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
-
-    if (error) {
-      setMessage(`Google login failed: ${error.message}`);
-    }
-  };
+  if (error) {
+    setMessage(`Google login failed: ${error.message}`);
+  }
+};
 
   return (
     <div className="bg-white shadow-2xl rounded-2xl p-6 sm:p-10 border border-indigo-100 animate-in fade-in duration-500">
@@ -115,3 +115,5 @@ const Auth = () => {
     </div>
   );
 };
+
+export default Auth;

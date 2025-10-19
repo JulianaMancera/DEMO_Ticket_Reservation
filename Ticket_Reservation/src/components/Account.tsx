@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { supabase } from "../../supabaseClient";
+import { useState } from "react";
+import { supabase } from '../../supabaseClient';
+import type { Session } from '@supabase/supabase-js';
 
-const Account = ({ session }) => {
+const Account = ({ session }: { session: Session | null }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -12,6 +13,8 @@ const Account = ({ session }) => {
     }
     setLoading(false);
   };
+
+  if (!session) return null;
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6 border border-gray-200 mb-8">
