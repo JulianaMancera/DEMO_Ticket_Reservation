@@ -34,8 +34,8 @@ const EventList = ({ session }: { session: Session | null }) => {
   }, []);
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-8">
-      <header className="flex justify-between items-center mb-6">
+    <div className="w-full min-h-screen px-4 sm:px-6 lg:px-8 py-8">
+      <header className="flex justify-between items-center mb-8 max-w-7xl mx-auto">
         <h1 className="text-4xl font-extrabold text-indigo-800">Available Events</h1>
         {session && <Account session={session} />}
       </header>
@@ -43,7 +43,7 @@ const EventList = ({ session }: { session: Session | null }) => {
       {loading ? (
         <div className="text-center p-10 text-xl text-gray-500">Loading events...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {events.map(event => (
             <div key={event.id} className="bg-white shadow-xl rounded-xl p-5 transform hover:scale-[1.02] transition duration-300 border-t-4 border-indigo-500">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">{event.title}</h2>

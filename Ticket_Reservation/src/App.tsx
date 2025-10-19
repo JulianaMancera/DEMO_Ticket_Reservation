@@ -25,14 +25,11 @@ function App() {
   const { data: listener } = supabase.auth.onAuthStateChange(
     (_event, currentSession) => {
       setSession(currentSession);
-      setLoading(false);
     }
   );
 
   return () => {
-    if (listener?.subscription?.unsubscribe) {
-      listener.subscription.unsubscribe();
-    }
+    listener?.subscription?.unsubscribe();
   };
 }, []);
 
@@ -47,16 +44,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-4 sm:p-8 font-sans">
-      <main className="w-full">
-        {session ? (
-          <EventList session={session} />
-        ) : (
-          <div className="w-full max-w-md mx-auto mt-16">
-            <Auth />
-          </div>
-        )}
-      </main>
+    <div className="min-h-screen w-full bg-gray-50 font-sans">
+      {session ? (
+        <EventList session={session} />
+      ) : (
+        <Auth />
+      )}
     </div>
   );
 }
