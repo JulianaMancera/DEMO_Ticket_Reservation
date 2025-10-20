@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
+import { supabase } from '../../supabaseClient'; 
 import Account from './Account';
 import type { Session } from '@supabase/supabase-js';
+
+interface RawEvent {
+  id: number;
+  name: string;
+  data: string; 
+  total_seats: number;
+}
+
 interface Event {
   id: number;
   title: string;
@@ -14,24 +23,59 @@ const EventList = ({ session }: { session: Session | null }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      console.log('[MOCK] Fetching Events...');
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  const fetchEvents = async () => {
+    setLoading(true);
+    console.log('[FETCH] Fetching Events from Supabase...');
 
-      const mockEvents = [
-        { id: 1, title: "The Cosmic Symphony", date: "Oct 28th", time: "8:00 PM", tickets: 150, price: 55.00 },
-        { id: 2, title: "Future Tech Expo 2024", date: "Nov 5th", time: "10:00 AM", tickets: 50, price: 120.00 },
-        { id: 3, title: "Comedy Night Live", date: "Nov 12th", time: "7:30 PM", tickets: 30, price: 30.00 },
-      ];
-      
-      setEvents(mockEvents);
-      setLoading(false);
-    };
+    const { data, error } = await supabase
+      .from('events')
+      .select('id, name, data, total_seats');
+
+    if (error) {
+      console.error('Error fetching events:', error.message);
+    } else {
+      const transformedEvents = (data as RawEvent[]).map(event => ({
+        id: event.id,
+        title: event.name,
+        date: event.data ? new Date(event.data).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '',
+        time: event.data ? new Date(event.data).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '',
+        tickets: event.total_seats || 0,
+        price: 0,
+      }));
+      setEvents(transformedEvents);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchEvents();
   }, []);
+
+  const reserveTicket = async (eventId: number) => {
+    const { data, error } = await supabase
+      .from('events')
+      .select('total_seats')
+      .eq('id', eventId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching event:', error?.message);
+      return;
+    }
+
+    if (data.total_seats > 0) {
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ total_seats: data.total_seats - 1 })
+        .eq('id', eventId);
+
+      if (updateError) {
+        console.error('Error updating seats:', updateError.message);
+      } else {
+        fetchEvents(); 
+      }
+    }
+  };
 
   return (
     <div className="w-full min-h-screen px-4 sm:px-6 lg:px-8 py-8">
@@ -52,8 +96,12 @@ const EventList = ({ session }: { session: Session | null }) => {
                 <span className="font-bold text-green-600">${event.price.toFixed(2)}</span>
                 <span className="text-sm font-medium text-yellow-600">{event.tickets} tickets left</span>
               </div>
-              <button className="mt-4 w-full py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-150 shadow-md">
-                Reserve Ticket
+              <button
+                onClick={() => reserveTicket(event.id)}
+                className="mt-4 w-full py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-150 shadow-md"
+                disabled={event.tickets === 0}
+              >
+                {event.tickets === 0 ? 'Sold Out' : 'Reserve Ticket'}
               </button>
             </div>
           ))}
