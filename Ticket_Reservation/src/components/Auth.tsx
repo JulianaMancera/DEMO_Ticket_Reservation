@@ -22,7 +22,7 @@ const Auth = () => {
     };
   }, []);
 
-  const handleEmailLogin = async (e) => {
+  const handleEmailLogin = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
