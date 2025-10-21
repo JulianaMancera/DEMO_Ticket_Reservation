@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { supabase } from '../../supabaseClient'; 
+import { supabase } from '../../supabaseClient';
 import Account from './Account';
 import type { Session } from '@supabase/supabase-js';
 
 interface RawEvent {
   id: number;
   name: string;
-  data: string; 
+  data: string;
   total_seats: number;
 }
 
@@ -52,6 +52,11 @@ const EventList = ({ session }: { session: Session | null }) => {
   }, []);
 
   const reserveTicket = async (eventId: number) => {
+    if (!session) {
+      console.error('No session available, please log in.');
+      return;
+    }
+
     const { data, error } = await supabase
       .from('events')
       .select('total_seats')
@@ -72,7 +77,7 @@ const EventList = ({ session }: { session: Session | null }) => {
       if (updateError) {
         console.error('Error updating seats:', updateError.message);
       } else {
-        fetchEvents(); 
+        fetchEvents();
       }
     }
   };
@@ -99,7 +104,7 @@ const EventList = ({ session }: { session: Session | null }) => {
               <button
                 onClick={() => reserveTicket(event.id)}
                 className="mt-4 w-full py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-150 shadow-md"
-                disabled={event.tickets === 0}
+                disabled={event.tickets === 0 || !session}
               >
                 {event.tickets === 0 ? 'Sold Out' : 'Reserve Ticket'}
               </button>
