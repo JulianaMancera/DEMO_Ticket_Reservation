@@ -7,16 +7,26 @@ const Auth = () => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Handle authentication state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    // Handle authentication state changes and log login
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         setMessage('Successfully signed in! Redirecting...');
+        // Log the login event
+        const { error } = await supabase
+          .from('login_logs')
+          .insert({
+            user_id: session.user.id,
+            email: session.user.email,
+          });
+
+        if (error) {
+          console.error('Error logging login:', error.message);
+        }
         // Redirect to event list or protected route
-        window.location.href = '/events'; // Adjust to your route
+        window.location.href = '/events';
       }
     });
 
-    // Cleanup subscription
     return () => {
       authListener.subscription.unsubscribe();
     };
