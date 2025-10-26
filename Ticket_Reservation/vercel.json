@@ -1,16 +1,5 @@
 {
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["**"] }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "buildCommand": "npm run build"
+    "rewrites": [
+      { "source": "/(.*)", "destination": "/" }
+    ]
 }
